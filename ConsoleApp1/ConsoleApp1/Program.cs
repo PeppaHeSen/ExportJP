@@ -29,31 +29,34 @@ namespace ConsoleApp1
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-          var jisEncode =   Encoding.GetEncoding("Shift_JIS");
-          var unicode =   Encoding.GetEncoding("unicode");
+            var jisEncode = Encoding.GetEncoding("Shift_JIS");
             StringBuilder sb = new StringBuilder();
-             
             int count = 0;
-
-            Action<int, int> lineAction = (x1, x2) => {
+            byte[] lineByte = new byte[1];
+            byte[] doubleByte = new byte[2];
+            void lineAction(int x1, int x2)
+            {
                 for (int i = x1; i < x2; i++)
                 {
-                    sb.Append(jisEncode.GetString(new byte[] { (byte)i }));
+                    lineByte[0] = (byte)i;
+                    sb.Append(jisEncode.GetString(lineByte));
                     if (count % 50 == 0)
                     {
                         sb.AppendLine();
                     }
                     count++;
                 }
-            };
-                         
-            Action<int, int, int, int> doubleAction = (x1, x2, y1, y2) =>
+            }
+
+            void doubleAction(int x1, int x2, int y1, int y2)
             {
                 for (int i = x1; i < x2; i++)
                 {
                     for (int l = y1; l < y2; l++)
                     {
-                        sb.Append(jisEncode.GetString(new byte[] { (byte)i, (byte)l }));
+                        doubleByte[0] = (byte)i;
+                        doubleByte[1] = (byte)l;
+                        sb.Append(jisEncode.GetString(doubleByte));
                         if (count % 50 == 0)
                         {
                             sb.AppendLine();
@@ -61,9 +64,8 @@ namespace ConsoleApp1
 
                         count++;
                     }
-
                 }
-            };
+            }
 
             lineAction(0x20, 0x7E);
             lineAction(0x00, 0x1F);
@@ -78,40 +80,40 @@ namespace ConsoleApp1
             doubleAction(0xF0, 0xFC, 0x40, 0x7E);
             doubleAction(0xF0, 0xFC, 0x80, 0xFC);
 
-            string str = sb.ToString();
-            sb.Clear();
-            var charAaaay = str.ToCharArray();
-            for (int i = 0; i < charAaaay.Length; i++)
-            {
-                string format = string.Format("\\u{0:x4}", (int)charAaaay[i]);
-                sb.Append(DecodeString(format));
-                if (count % 50 == 0)
-                {
-                    sb.AppendLine();
-                }
+            //string str = sb.ToString();
+            //sb.Clear();
+            //var charAaaay = str.ToCharArray();
+            //for (int i = 0; i < charAaaay.Length; i++)
+            //{
+            //    string format = string.Format("\\u{0:x4}", (int)charAaaay[i]);
+            //    sb.Append(DecodeString(format));
+            //    if (count % 50 == 0)
+            //    {
+            //        sb.AppendLine();
+            //    }
 
-                count++;
-            }
+            //    count++;
+            //}
 
             File.WriteAllText("D://output.txt", sb.ToString());
         }
 
-        public static string DecodeString(string unicode)
-        {
-            if (string.IsNullOrEmpty(unicode))
-            {
-                return string.Empty;
-            }
+        //public static string DecodeString(string unicode)
+        //{
+        //    if (string.IsNullOrEmpty(unicode))
+        //    {
+        //        return string.Empty;
+        //    }
 
-            string[] ls = unicode.Split(new string[] { "\\u" }, StringSplitOptions.RemoveEmptyEntries);
-            StringBuilder builder = new StringBuilder();
-            int len = ls.Length;
-            for (int i = 0; i < len; i++)
-            {
-                builder.Append(Convert.ToChar(ushort.Parse(ls[i], System.Globalization.NumberStyles.HexNumber)));
-            }
+        //    string[] ls = unicode.Split(new string[] { "\\u" }, StringSplitOptions.RemoveEmptyEntries);
+        //    StringBuilder builder = new StringBuilder();
+        //    int len = ls.Length;
+        //    for (int i = 0; i < len; i++)
+        //    {
+        //        builder.Append(Convert.ToChar(ushort.Parse(ls[i], System.Globalization.NumberStyles.HexNumber)));
+        //    }
 
-            return builder.ToString();
-        }
+        //    return builder.ToString();
+        //}
     }
 }
